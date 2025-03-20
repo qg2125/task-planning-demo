@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, FileText, Mail } from "lucide-react";
 
 const Home = () => {
   // Categories state with predefined categories
@@ -235,26 +235,51 @@ const Home = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto relative">
       {/* Always visible New Term button or input field */}
-      <div className="mb-10">
-        {!showTermInput ? (
+      <div className="mb-10 flex items-center justify-between">
+        <div>
+          {!showTermInput ? (
+            <Button
+              onClick={handleNewTermClick}
+              className="px-4 py-2 text-xl rounded-md hover:bg-gray-100"
+            >
+              + New Term
+            </Button>
+          ) : (
+            <form onSubmit={handleTermSubmit} className="w-64">
+              <input
+                type="text"
+                value={newTermName}
+                onChange={(e) => setNewTermName(e.target.value)}
+                placeholder="Enter term (e.g. Fall 2025)"
+                className="w-full px-4 py-2 border border-blue-500 rounded-md focus:outline-none"
+                autoFocus
+              />
+            </form>
+          )}
+        </div>
+
+        <div className="flex gap-2">
           <Button
-            onClick={handleNewTermClick}
-            className="px-4 py-2 text-xl rounded-md hover:bg-gray-100"
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => {
+              /* 添加Report功能 */
+            }}
           >
-            + New Term
+            <FileText className="w-4 h-4" />
+            Report
           </Button>
-        ) : (
-          <form onSubmit={handleTermSubmit} className="w-64">
-            <input
-              type="text"
-              value={newTermName}
-              onChange={(e) => setNewTermName(e.target.value)}
-              placeholder="Enter term (e.g. Fall 2025)"
-              className="w-full px-4 py-2 border border-blue-500 rounded-md focus:outline-none"
-              autoFocus
-            />
-          </form>
-        )}
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => {
+              /* 添加Email功能 */
+            }}
+          >
+            <Mail className="w-4 h-4" />
+            Email
+          </Button>
+        </div>
       </div>
 
       {/* Terms and their Task Lists */}
