@@ -11,29 +11,57 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
 const Home = () => {
-  // Predefined categories with colors
-  const categories = [
+  // Categories state with predefined categories
+  const [categories, setCategories] = useState([
     { id: "language", name: "Language test", color: "#bce7fd" },
     { id: "gpa", name: "GPA", color: "#b0db43" },
     { id: "practice", name: "Internship", color: "#db2763" },
     { id: "activity", name: "Research", color: "#c492b1" },
-  ];
+  ]);
+
+  // Custom category states
+  const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
   // Term related states
   const [showTermInput, setShowTermInput] = useState(false);
   const [newTermName, setNewTermName] = useState("");
   const [terms, setTerms] = useState([]);
+  const [editingTermId, setEditingTermId] = useState(null);
+  const [editingTermName, setEditingTermName] = useState("");
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState({
+    type: null,
+    id: null,
+  });
 
-  // Handle the button click to show term input
+  const generateRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 40 + Math.floor(Math.random() * 30);
+    const lightness = 65 + Math.floor(Math.random() * 20);
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+
+  const handleCustomCategorySubmit = () => {
+    if (newCategoryName.trim()) {
+      const newCategory = {
+        id: `custom-${Date.now()}`,
+        name: newCategoryName,
+        color: generateRandomColor(),
+      };
+      setCategories((prev) => [...prev, newCategory]);
+      setNewCategoryName("");
+      setShowCustomCategoryInput(false);
+    }
+  };
+
   const handleNewTermClick = () => {
     setShowTermInput(true);
   };
 
-  // Handle term submission
   const handleTermSubmit = (e) => {
     e.preventDefault();
     if (newTermName.trim()) {
-      // Add the new term to the list of terms
       setTerms((prevTerms) => [
         {
           id: Date.now(),
@@ -42,14 +70,61 @@ const Home = () => {
           showTaskModal: false,
           newTask: { category: "", summary: "", dueDate: null },
         },
-        ...prevTerms, // Add new term at the beginning
+        ...prevTerms,
       ]);
       setNewTermName("");
       setShowTermInput(false);
     }
   };
 
-  // Handle task form input changes
+  const handleEditTerm = (term) => {
+    setEditingTermId(term.id);
+    setEditingTermName(term.name);
+  };
+
+  const handleUpdateTerm = () => {
+    if (editingTermName.trim()) {
+      setTerms((prevTerms) =>
+        prevTerms.map((term) =>
+          term.id === editingTermId ? { ...term, name: editingTermName } : term
+        )
+      );
+      setEditingTermId(null);
+      setEditingTermName("");
+    }
+  };
+
+  const handleDeleteTerm = (termId) => {
+    setTerms((prevTerms) => prevTerms.filter((term) => term.id !== termId));
+    setShowDeleteConfirm({ type: null, id: null });
+  };
+
+  const handleEditTask = (termId, task) => {
+    setEditingTaskId(task.id);
+    setTerms((prevTerms) =>
+      prevTerms.map((term) =>
+        term.id === termId
+          ? {
+              ...term,
+              showTaskModal: true,
+              newTask: { ...task },
+            }
+          : term
+      )
+    );
+  };
+
+  const handleDeleteTask = (termId, taskId) => {
+    setTerms((prevTerms) =>
+      prevTerms.map((term) =>
+        term.id === termId
+          ? { ...term, tasks: term.tasks.filter((task) => task.id !== taskId) }
+          : term
+      )
+    );
+    setShowDeleteConfirm({ type: null, id: null });
+  };
+
   const handleTaskInputChange = (termId, e) => {
     const { name, value } = e.target;
     setTerms((prevTerms) =>
@@ -64,7 +139,6 @@ const Home = () => {
     );
   };
 
-  // Handle due date selection
   const handleDateChange = (termId, date) => {
     setTerms((prevTerms) =>
       prevTerms.map((term) =>
@@ -78,7 +152,6 @@ const Home = () => {
     );
   };
 
-  // Handle category selection
   const handleCategorySelect = (termId, categoryId) => {
     setTerms((prevTerms) =>
       prevTerms.map((term) =>
@@ -92,7 +165,6 @@ const Home = () => {
     );
   };
 
-  // Toggle task modal for a specific term
   const toggleTaskModal = (termId, show) => {
     setTerms((prevTerms) =>
       prevTerms.map((term) =>
@@ -109,7 +181,6 @@ const Home = () => {
     );
   };
 
-  // Handle task submission for a specific term
   const handleTaskSubmit = (termId, e) => {
     e.preventDefault();
     setTerms((prevTerms) =>
@@ -119,19 +190,34 @@ const Home = () => {
           term.newTask?.category &&
           term.newTask?.summary
         ) {
-          return {
-            ...term,
-            tasks: [...term.tasks, { ...term.newTask, id: Date.now() }],
-            showTaskModal: false,
-            newTask: { category: "", summary: "", dueDate: null },
-          };
+          if (editingTaskId) {
+            // Update existing task
+            return {
+              ...term,
+              tasks: term.tasks.map((task) =>
+                task.id === editingTaskId
+                  ? { ...term.newTask, id: task.id }
+                  : task
+              ),
+              showTaskModal: false,
+              newTask: { category: "", summary: "", dueDate: null },
+            };
+          } else {
+            // Add new task
+            return {
+              ...term,
+              tasks: [...term.tasks, { ...term.newTask, id: Date.now() }],
+              showTaskModal: false,
+              newTask: { category: "", summary: "", dueDate: null },
+            };
+          }
         }
         return term;
       })
     );
+    setEditingTaskId(null);
   };
 
-  // Get category details by id
   const getCategoryById = (categoryId) => {
     return (
       categories.find((cat) => cat.id === categoryId) || {
@@ -141,7 +227,6 @@ const Home = () => {
     );
   };
 
-  // Format date for display
   const formatDate = (date) => {
     if (!date) return "";
     return format(date, "MMM d");
@@ -176,16 +261,56 @@ const Home = () => {
       {terms.map((term) => (
         <div key={term.id} className="mb-16 border-t pt-8">
           {/* Term Banner */}
-          <div className="mb-10">
-            <h1 className="text-3xl font-bold text-primary">{term.name}</h1>
+          <div className="mb-10 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {editingTermId === term.id ? (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={editingTermName}
+                    onChange={(e) => setEditingTermName(e.target.value)}
+                    className="text-3xl font-bold px-2 border border-gray-300 rounded"
+                    autoFocus
+                  />
+                  <Button onClick={handleUpdateTerm} variant="outline">
+                    Save
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-3xl font-bold text-primary">
+                    {term.name}
+                  </h1>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                      onClick={() => handleEditTerm(term)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                      onClick={() =>
+                        setShowDeleteConfirm({ type: "term", id: term.id })
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Task Headers */}
           <div className="mb-6">
             <div className="flex">
               <div className="flex-1 text-2xl">Category</div>
-              <div className="flex-1 text-2xl">Task Summary</div>
+              <div className="flex-2 text-2xl gap-8">Task Summary</div>
               <div className="flex-1 text-2xl">Due Date</div>
+              <div className="w-[200px]"></div>
             </div>
           </div>
 
@@ -193,7 +318,7 @@ const Home = () => {
           {term.tasks.length > 0 && (
             <div className="mb-8">
               {term.tasks.map((task) => (
-                <div key={task.id} className="flex py-2">
+                <div key={task.id} className="flex py-2 items-center">
                   <div className="flex-1 flex items-center">
                     <div
                       className="w-4 h-4 rounded-full mr-2"
@@ -203,8 +328,30 @@ const Home = () => {
                     ></div>
                     {getCategoryById(task.category).name}
                   </div>
-                  <div className="flex-1">{task.summary}</div>
-                  <div className="flex-1">{formatDate(task.dueDate)}</div>
+                  <div className="flex-2 gap-8">{task.summary}</div>
+                  <div className="flex-1 ">🗓️ {formatDate(task.dueDate)}</div>
+                  <div className="flex gap-2 w-[200px]">
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                      onClick={() => handleEditTask(term.id, task)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                      onClick={() =>
+                        setShowDeleteConfirm({
+                          type: "task",
+                          id: task.id,
+                          termId: term.id,
+                        })
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -223,7 +370,7 @@ const Home = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-6 w-full max-w-lg">
                 <h2 className="text-xl font-bold mb-4">
-                  Add New Task for {term.name}
+                  {editingTaskId ? "Edit Task" : "Add New Task"} for {term.name}
                 </h2>
 
                 <form onSubmit={(e) => handleTaskSubmit(term.id, e)}>
@@ -253,6 +400,36 @@ const Home = () => {
                             <span>{category.name}</span>
                           </button>
                         ))}
+
+                        {!showCustomCategoryInput ? (
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomCategoryInput(true)}
+                            className="flex items-center py-2 px-3 rounded-full border border-gray-300"
+                          >
+                            + Custom Category
+                          </button>
+                        ) : (
+                          <div className="flex">
+                            <input
+                              type="text"
+                              value={newCategoryName}
+                              onChange={(e) =>
+                                setNewCategoryName(e.target.value)
+                              }
+                              placeholder="Enter category name"
+                              className="px-3 py-1 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              onClick={handleCustomCategorySubmit}
+                              className="px-3 py-1 bg-blue-500 text-white rounded-r-full hover:bg-blue-600"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -303,7 +480,10 @@ const Home = () => {
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
-                      onClick={() => toggleTaskModal(term.id, false)}
+                      onClick={() => {
+                        toggleTaskModal(term.id, false);
+                        setEditingTaskId(null);
+                      }}
                       className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
                     >
                       Cancel
@@ -312,7 +492,7 @@ const Home = () => {
                       type="submit"
                       className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                     >
-                      Save Task
+                      {editingTaskId ? "Update Task" : "Save Task"}
                     </button>
                   </div>
                 </form>
@@ -321,6 +501,42 @@ const Home = () => {
           )}
         </div>
       ))}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm.type && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
+            <p className="mb-6">
+              Are you sure you want to delete this {showDeleteConfirm.type}?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm({ type: null, id: null })}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (showDeleteConfirm.type === "term") {
+                    handleDeleteTerm(showDeleteConfirm.id);
+                  } else {
+                    handleDeleteTask(
+                      showDeleteConfirm.termId,
+                      showDeleteConfirm.id
+                    );
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
