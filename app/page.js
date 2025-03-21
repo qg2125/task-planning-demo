@@ -13,10 +13,13 @@ import { CalendarIcon, FileText, Mail } from "lucide-react";
 const Home = () => {
   // Categories state with predefined categories
   const [categories, setCategories] = useState([
-    { id: "language", name: "Language test", color: "#bce7fd" },
-    { id: "gpa", name: "GPA", color: "#b0db43" },
-    { id: "practice", name: "Internship", color: "#db2763" },
-    { id: "activity", name: "Research", color: "#c492b1" },
+    { id: "language", name: "语言考试", color: "#bce7fd" }, // 保持原有的浅蓝色
+    { id: "gpa", name: "GPA", color: "#b0db43" }, // 保持原有的青柠绿
+    { id: "course", name: "选课", color: "#a8e6cf" }, // 清新的薄荷绿
+    { id: "resume", name: "简历", color: "#ffd3b6" }, // 保持原有的浅紫色
+    { id: "recommendation", name: "推荐信", color: "#ffb5e8" }, // 柔和的粉色
+    { id: "interview", name: "模拟面试", color: "#dcd3ff" }, // 淡雅的薰衣草紫
+    { id: "practice", name: "实习/科研/海外交换", color: "#db2763" }, // 保持原有的玫红色
   ]);
 
   // Custom category states
@@ -33,6 +36,13 @@ const Home = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState({
     type: null,
     id: null,
+  });
+
+  // Overall planning state
+  const [overallPlan, setOverallPlan] = useState({
+    items: [],
+    showAddForm: false,
+    newItem: { category: "", summary: "", startDate: null, dueDate: null },
   });
 
   const generateRandomColor = () => {
@@ -68,7 +78,12 @@ const Home = () => {
           name: newTermName,
           tasks: [],
           showTaskModal: false,
-          newTask: { category: "", summary: "", dueDate: null },
+          newTask: {
+            category: "",
+            summary: "",
+            startDate: null,
+            dueDate: null,
+          },
         },
         ...prevTerms,
       ]);
@@ -152,6 +167,28 @@ const Home = () => {
     );
   };
 
+  // 为 term tasks 添加处理开始日期的函数
+  const handleStartDateChange = (termId, date) => {
+    setTerms((prevTerms) =>
+      prevTerms.map((term) =>
+        term.id === termId
+          ? {
+              ...term,
+              newTask: { ...term.newTask, startDate: date },
+            }
+          : term
+      )
+    );
+  };
+
+  // 为 overall tasks 添加处理开始日期的函数
+  const handleOverallStartDateChange = (date) => {
+    setOverallPlan({
+      ...overallPlan,
+      newItem: { ...overallPlan.newItem, startDate: date },
+    });
+  };
+
   const handleCategorySelect = (termId, categoryId) => {
     setTerms((prevTerms) =>
       prevTerms.map((term) =>
@@ -218,6 +255,87 @@ const Home = () => {
     setEditingTaskId(null);
   };
 
+  // Overall plan task handlers
+  const toggleOverallTaskModal = (show) => {
+    setOverallPlan({
+      ...overallPlan,
+      showAddForm: show,
+      newItem: show
+        ? { category: "", summary: "", dueDate: null }
+        : overallPlan.newItem,
+    });
+  };
+
+  const handleOverallTaskInputChange = (e) => {
+    const { name, value } = e.target;
+    setOverallPlan({
+      ...overallPlan,
+      newItem: { ...overallPlan.newItem, [name]: value },
+    });
+  };
+
+  const handleOverallDateChange = (date) => {
+    setOverallPlan({
+      ...overallPlan,
+      newItem: { ...overallPlan.newItem, dueDate: date },
+    });
+  };
+
+  const handleOverallCategorySelect = (categoryId) => {
+    setOverallPlan({
+      ...overallPlan,
+      newItem: { ...overallPlan.newItem, category: categoryId },
+    });
+  };
+
+  const handleOverallTaskSubmit = (e) => {
+    e.preventDefault();
+    if (overallPlan.newItem?.category && overallPlan.newItem?.summary) {
+      if (editingTaskId) {
+        // Update existing task
+        setOverallPlan({
+          ...overallPlan,
+          items: overallPlan.items.map((item) =>
+            item.id === editingTaskId
+              ? { ...overallPlan.newItem, id: item.id }
+              : item
+          ),
+          showAddForm: false,
+          newItem: { category: "", summary: "", dueDate: null },
+        });
+      } else {
+        // Add new task
+        setOverallPlan({
+          ...overallPlan,
+          items: [
+            ...overallPlan.items,
+            { ...overallPlan.newItem, id: Date.now() },
+          ],
+          showAddForm: false,
+          newItem: { category: "", summary: "", dueDate: null },
+        });
+      }
+      setEditingTaskId(null);
+    }
+  };
+
+  const handleEditOverallTask = (task) => {
+    setEditingTaskId(task.id);
+    setOverallPlan({
+      ...overallPlan,
+      showAddForm: true,
+      newItem: { ...task },
+    });
+  };
+
+  const handleDeleteOverallTask = (taskId) => {
+    setOverallPlan({
+      ...overallPlan,
+      items: overallPlan.items.filter((item) => item.id !== taskId),
+    });
+    setShowDeleteConfirm({ type: null, id: null });
+  };
+
   const getCategoryById = (categoryId) => {
     return (
       categories.find((cat) => cat.id === categoryId) || {
@@ -242,7 +360,7 @@ const Home = () => {
               onClick={handleNewTermClick}
               className="px-4 py-2 text-xl rounded-md hover:bg-gray-100"
             >
-              + New Term
+              + 添加新阶段
             </Button>
           ) : (
             <form onSubmit={handleTermSubmit} className="w-64">
@@ -267,7 +385,7 @@ const Home = () => {
             }}
           >
             <FileText className="w-4 h-4" />
-            Report
+            生成规划报告
           </Button>
           <Button
             variant="outline"
@@ -277,9 +395,82 @@ const Home = () => {
             }}
           >
             <Mail className="w-4 h-4" />
-            Email
+            发送模板邮件
           </Button>
         </div>
+      </div>
+
+      {/* Overall Planning Section */}
+      <div className="mb-16 border-t pt-8">
+        <h1 className="text-3xl font-bold text-primary mb-10">总体规划</h1>
+
+        {/* Task Headers */}
+        <div className="mb-6">
+          <div className="flex">
+            <div className="flex-1 text-2xl">类别</div>
+            <div className="flex-2 text-2xl gap-8">任务描述</div>
+            <div className="flex-1 text-2xl">开始日期</div>
+            <div className="flex-1 text-2xl">截止日期</div>
+            <div className="w-[200px]"></div>
+          </div>
+        </div>
+
+        {/* Overall plan tasks list */}
+        {overallPlan.items.length > 0 && (
+          <div className="mb-8">
+            {overallPlan.items.map((task) => (
+              <div key={task.id} className="flex py-2 items-center">
+                <div className="flex-1 flex items-center">
+                  <div
+                    className="w-4 h-4 rounded-full mr-2"
+                    style={{
+                      backgroundColor: getCategoryById(task.category).color,
+                    }}
+                  ></div>
+                  {getCategoryById(task.category).name}
+                </div>
+                <div className="flex-2 gap-8 whitespace-pre-wrap">
+                  {task.summary}
+                </div>
+                <div className="flex-1">
+                  {task.startDate ? `🗓️ ${formatDate(task.startDate)}` : ""}
+                </div>
+                <div className="flex-1">
+                  {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
+                </div>
+                <div className="flex gap-2 w-[200px]">
+                  <Button
+                    variant="outline"
+                    className="border-primary text-primary"
+                    onClick={() => handleEditOverallTask(task)}
+                  >
+                    编辑
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-primary text-primary"
+                    onClick={() =>
+                      setShowDeleteConfirm({
+                        type: "overall-task",
+                        id: task.id,
+                      })
+                    }
+                  >
+                    删除
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add Task Button */}
+        <button
+          onClick={() => toggleOverallTaskModal(true)}
+          className="px-4 py-2 text-xl text-secondary hover:bg-gray-100"
+        >
+          + 添加任务
+        </button>
       </div>
 
       {/* Terms and their Task Lists */}
@@ -312,7 +503,7 @@ const Home = () => {
                       className="border-primary text-primary"
                       onClick={() => handleEditTerm(term)}
                     >
-                      Edit
+                      编辑
                     </Button>
                     <Button
                       variant="outline"
@@ -321,7 +512,7 @@ const Home = () => {
                         setShowDeleteConfirm({ type: "term", id: term.id })
                       }
                     >
-                      Delete
+                      删除
                     </Button>
                   </div>
                 </>
@@ -332,9 +523,10 @@ const Home = () => {
           {/* Task Headers */}
           <div className="mb-6">
             <div className="flex">
-              <div className="flex-1 text-2xl">Category</div>
-              <div className="flex-2 text-2xl gap-8">Task Summary</div>
-              <div className="flex-1 text-2xl">Due Date</div>
+              <div className="flex-1 text-2xl">类别</div>
+              <div className="flex-2 text-2xl gap-8">任务描述</div>
+              <div className="flex-1 text-2xl">开始日期</div>
+              <div className="flex-1 text-2xl">截止日期</div>
               <div className="w-[200px]"></div>
             </div>
           </div>
@@ -353,15 +545,22 @@ const Home = () => {
                     ></div>
                     {getCategoryById(task.category).name}
                   </div>
-                  <div className="flex-2 gap-8">{task.summary}</div>
-                  <div className="flex-1 ">🗓️ {formatDate(task.dueDate)}</div>
+                  <div className="flex-2 gap-8 whitespace-pre-wrap">
+                    {task.summary}
+                  </div>
+                  <div className="flex-1">
+                    {task.startDate ? `🗓️ ${formatDate(task.startDate)}` : ""}
+                  </div>
+                  <div className="flex-1">
+                    {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
+                  </div>
                   <div className="flex gap-2 w-[200px]">
                     <Button
                       variant="outline"
                       className="border-primary text-primary"
                       onClick={() => handleEditTask(term.id, task)}
                     >
-                      Edit
+                      编辑
                     </Button>
                     <Button
                       variant="outline"
@@ -374,7 +573,7 @@ const Home = () => {
                         })
                       }
                     >
-                      Delete
+                      删除
                     </Button>
                   </div>
                 </div>
@@ -387,7 +586,7 @@ const Home = () => {
             onClick={() => toggleTaskModal(term.id, true)}
             className="px-4 py-2 text-xl text-secondary hover:bg-gray-100"
           >
-            + Add Task
+            + 添加任务
           </button>
 
           {/* Task Modal */}
@@ -402,7 +601,7 @@ const Home = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Category
+                        类别
                       </label>
                       <div className="flex flex-wrap gap-2">
                         {categories.map((category) => (
@@ -432,7 +631,7 @@ const Home = () => {
                             onClick={() => setShowCustomCategoryInput(true)}
                             className="flex items-center py-2 px-3 rounded-full border border-gray-300"
                           >
-                            + Custom Category
+                            + 自定义类别
                           </button>
                         ) : (
                           <div className="flex">
@@ -451,7 +650,7 @@ const Home = () => {
                               onClick={handleCustomCategorySubmit}
                               className="px-3 py-1 bg-blue-500 text-white rounded-r-full hover:bg-blue-600"
                             >
-                              Add
+                              添加
                             </button>
                           </div>
                         )}
@@ -460,9 +659,9 @@ const Home = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Task Summary
+                        任务描述
                       </label>
-                      <input
+                      <textarea
                         type="text"
                         name="summary"
                         value={term.newTask?.summary || ""}
@@ -471,10 +670,40 @@ const Home = () => {
                         autoFocus
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        开始日期（可选）
+                      </label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start text-left font-normal"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {term.newTask?.startDate ? (
+                              formatDate(term.newTask.startDate)
+                            ) : (
+                              <span>选择日期</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={term.newTask?.startDate}
+                            onSelect={(date) =>
+                              handleStartDateChange(term.id, date)
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Due Date
+                        截止日期（可选）
                       </label>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -486,7 +715,7 @@ const Home = () => {
                             {term.newTask?.dueDate ? (
                               formatDate(term.newTask.dueDate)
                             ) : (
-                              <span>Pick a date</span>
+                              <span>选择日期</span>
                             )}
                           </Button>
                         </PopoverTrigger>
@@ -527,14 +756,175 @@ const Home = () => {
         </div>
       ))}
 
+      {/* Overall Task Modal */}
+      {overallPlan.showAddForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+            <h2 className="text-xl font-bold mb-4">
+              {editingTaskId ? "Edit Task" : "Add New Task"} for 总体规划
+            </h2>
+
+            <form onSubmit={handleOverallTaskSubmit}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    类别
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((category) => (
+                      <button
+                        key={category.id}
+                        type="button"
+                        className={`flex items-center py-2 px-3 rounded-full border ${
+                          overallPlan.newItem?.category === category.id
+                            ? "border-blue-500 ring-2 ring-blue-300"
+                            : "border-gray-300"
+                        }`}
+                        onClick={() => handleOverallCategorySelect(category.id)}
+                      >
+                        <div
+                          className="w-4 h-4 rounded-full mr-2"
+                          style={{ backgroundColor: category.color }}
+                        ></div>
+                        <span>{category.name}</span>
+                      </button>
+                    ))}
+
+                    {!showCustomCategoryInput ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowCustomCategoryInput(true)}
+                        className="flex items-center py-2 px-3 rounded-full border border-gray-300"
+                      >
+                        + 自定义类别
+                      </button>
+                    ) : (
+                      <div className="flex">
+                        <input
+                          type="text"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          placeholder="Enter category name"
+                          className="px-3 py-1 border border-gray-300 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autoFocus
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCustomCategorySubmit}
+                          className="px-3 py-1 bg-blue-500 text-white rounded-r-full hover:bg-blue-600"
+                        >
+                          添加
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    任务描述
+                  </label>
+                  <textarea
+                    type="text"
+                    name="summary"
+                    value={overallPlan.newItem?.summary || ""}
+                    onChange={handleOverallTaskInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    开始日期（可选）
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {overallPlan.newItem?.startDate ? (
+                          formatDate(overallPlan.newItem.startDate)
+                        ) : (
+                          <span>选择日期</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={overallPlan.newItem?.startDate}
+                        onSelect={handleOverallStartDateChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    截止日期（可选）
+                  </label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {overallPlan.newItem?.dueDate ? (
+                          formatDate(overallPlan.newItem.dueDate)
+                        ) : (
+                          <span>选择日期</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={overallPlan.newItem?.dueDate}
+                        onSelect={handleOverallDateChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleOverallTaskModal(false);
+                    setEditingTaskId(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                >
+                  {editingTaskId ? "Update Task" : "Save Task"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm.type && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
             <p className="mb-6">
-              Are you sure you want to delete this {showDeleteConfirm.type}?
-              This action cannot be undone.
+              Are you sure you want to delete this{" "}
+              {showDeleteConfirm.type === "overall-task"
+                ? "task"
+                : showDeleteConfirm.type}
+              ? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <Button
@@ -548,6 +938,8 @@ const Home = () => {
                 onClick={() => {
                   if (showDeleteConfirm.type === "term") {
                     handleDeleteTerm(showDeleteConfirm.id);
+                  } else if (showDeleteConfirm.type === "overall-task") {
+                    handleDeleteOverallTask(showDeleteConfirm.id);
                   } else {
                     handleDeleteTask(
                       showDeleteConfirm.termId,
