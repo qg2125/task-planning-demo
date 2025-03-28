@@ -41,7 +41,7 @@ const Home = () => {
     { id: "others", name: "其他", color: "#e0e0e0" },
     { id: "standardSeedClassCourse", name: "棕榈种子班课", color: "#f9d5e5" },
     { id: "semesterCommunication", name: "学期沟通", color: "#eeac99" },
-    { id: "exclusiveOnly", name: "专享only", color: "#d4f0f0" },
+    { id: "exclusiveOnly", name: "专导only", color: "#d4f0f0" },
     { id: "nodeEmail", name: "节点邮件", color: "#ffc4a3" },
   ]);
 
