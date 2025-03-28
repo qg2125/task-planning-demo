@@ -8,7 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, FileText, Mail } from "lucide-react";
+import { CalendarIcon, FileText, Mail, X } from "lucide-react";
 
 const Home = () => {
   // Categories state with predefined categories
@@ -21,6 +21,33 @@ const Home = () => {
     { id: "interview", name: "模拟面试", color: "#dcd3ff" }, // 淡雅的薰衣草紫
     { id: "practice", name: "实习/科研/海外交换", color: "#db2763" }, // 保持原有的玫红色
   ]);
+
+  //发送邮件
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailForm, setEmailForm] = useState({
+    recipient: "",
+    subject: "",
+    content: "",
+  });
+
+  // 处理邮件表单输入的函数
+  const handleEmailInputChange = (e) => {
+    const { name, value } = e.target;
+    setEmailForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // 发送邮件的处理函数
+  const handleSendEmail = (e) => {
+    e.preventDefault();
+    // TODO: 实际发送邮件的逻辑
+    console.log("发送邮件:", emailForm);
+    // 这里可以添加真实的邮件发送API调用
+    setShowEmailModal(false);
+    // 可以添加发送成功的通知
+  };
 
   // Custom category states
   const [showCustomCategoryInput, setShowCustomCategoryInput] = useState(false);
@@ -397,15 +424,94 @@ const Home = () => {
 
           <Button
             className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-gray-100"
-            onClick={() => {
-              /* 添加Email功能 */
-            }}
+            onClick={() => setShowEmailModal(true)}
           >
             <Mail className="w-4 h-4" />
             发送邮件
           </Button>
         </div>
       </div>
+
+      {/* 邮件发送模态框 */}
+      {showEmailModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg relative">
+            <button
+              onClick={() => setShowEmailModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <h2 className="text-2xl font-bold mb-6 text-center">发送邮件</h2>
+
+            <form onSubmit={handleSendEmail} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  主题
+                </label>
+                <input
+                  type="text"
+                  name="subject"
+                  value={emailForm.subject}
+                  onChange={handleEmailInputChange}
+                  required
+                  placeholder="请输入邮件主题"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  模板邮件
+                </label>
+                <input type="checkbox" className="w-5 h-5 accent-blue-500" />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  模板
+                </label>
+                <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="xx"></option>
+                  <option value="zhudaoshi">主导师节点</option>
+                  <option value="zhongzi">种子主导师节点</option>
+                  <option value="banzhuren">班主任节点</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  内容
+                </label>
+                <textarea
+                  name="content"
+                  value={emailForm.content}
+                  onChange={handleEmailInputChange}
+                  required
+                  rows="4"
+                  placeholder="请输入邮件内容"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="flex justify-center space-x-4 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowEmailModal(false)}
+                >
+                  取消
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  发送
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Overall Planning Section */}
       <div className="mb-16  pt-8">
