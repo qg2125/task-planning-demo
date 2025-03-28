@@ -774,7 +774,7 @@ const Home = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        任务描述
+                        备注
                       </label>
                       <textarea
                         type="text"
@@ -937,7 +937,7 @@ const Home = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    任务描述
+                    备注
                   </label>
                   <textarea
                     type="text"
