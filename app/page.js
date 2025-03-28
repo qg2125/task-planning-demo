@@ -353,64 +353,71 @@ const Home = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto relative">
       {/* Always visible New Term button or input field */}
-      <div className="mb-10 flex items-center justify-between">
-        <div>
-          {!showTermInput ? (
-            <Button
-              onClick={handleNewTermClick}
-              className="px-4 py-2 text-xl rounded-md hover:bg-gray-100"
-            >
-              + 添加新阶段
-            </Button>
-          ) : (
-            <form onSubmit={handleTermSubmit} className="w-64">
-              <input
-                type="text"
-                value={newTermName}
-                onChange={(e) => setNewTermName(e.target.value)}
-                placeholder="Enter term (e.g. Fall 2025)"
-                className="w-full px-4 py-2 border border-blue-500 rounded-md focus:outline-none"
-                autoFocus
-              />
-            </form>
-          )}
-        </div>
-
+      <div className="mb-10 flex items-center justify-end">
         <div className="flex gap-2">
           <Button
-            variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-gray-100"
             onClick={() => {
               /* 添加Report功能 */
             }}
           >
             <FileText className="w-4 h-4" />
-            生成规划报告
+            附件编辑
           </Button>
           <Button
-            variant="outline"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-gray-100"
+            onClick={() => {
+              /* 添加Report功能 */
+            }}
+          >
+            <FileText className="w-4 h-4" />
+            导出报告
+          </Button>
+          <div>
+            {!showTermInput ? (
+              <Button
+                onClick={handleNewTermClick}
+                className="px-4 py-2 text-sm rounded-md hover:bg-gray-100"
+              >
+                + 创建新阶段
+              </Button>
+            ) : (
+              <form onSubmit={handleTermSubmit} className="w-64">
+                <input
+                  type="text"
+                  value={newTermName}
+                  onChange={(e) => setNewTermName(e.target.value)}
+                  placeholder="Enter term (e.g. Fall 2025)"
+                  className="w-full px-4 py-2 border border-blue-500 rounded-md focus:outline-none"
+                  autoFocus
+                />
+              </form>
+            )}
+          </div>
+
+          <Button
+            className="flex items-center gap-2 px-4 py-2 text-sm rounded-md hover:bg-gray-100"
             onClick={() => {
               /* 添加Email功能 */
             }}
           >
             <Mail className="w-4 h-4" />
-            发送模板邮件
+            发送邮件
           </Button>
         </div>
       </div>
 
       {/* Overall Planning Section */}
-      <div className="mb-16 border-t pt-8">
+      <div className="mb-16  pt-8">
         <h1 className="text-3xl font-bold text-primary mb-10">总体规划</h1>
 
         {/* Task Headers */}
         <div className="mb-6">
           <div className="flex">
             <div className="flex-1 text-2xl">类别</div>
-            <div className="flex-2 text-2xl gap-8">任务描述</div>
             <div className="flex-1 text-2xl">开始日期</div>
             <div className="flex-1 text-2xl">截止日期</div>
+            <div className="flex-2 text-2xl gap-8">备注</div>
             <div className="w-[200px]"></div>
           </div>
         </div>
@@ -429,15 +436,16 @@ const Home = () => {
                   ></div>
                   {getCategoryById(task.category).name}
                 </div>
-                <div className="flex-2 gap-8 whitespace-pre-wrap">
-                  {task.summary}
-                </div>
                 <div className="flex-1">
                   {task.startDate ? `🗓️ ${formatDate(task.startDate)}` : ""}
                 </div>
                 <div className="flex-1">
                   {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
                 </div>
+                <div className="flex-2 gap-8 whitespace-pre-wrap">
+                  {task.summary}
+                </div>
+
                 <div className="flex gap-2 w-[200px]">
                   <Button
                     variant="outline"
@@ -524,9 +532,9 @@ const Home = () => {
           <div className="mb-6">
             <div className="flex">
               <div className="flex-1 text-2xl">类别</div>
-              <div className="flex-2 text-2xl gap-8">任务描述</div>
               <div className="flex-1 text-2xl">开始日期</div>
               <div className="flex-1 text-2xl">截止日期</div>
+              <div className="flex-2 text-2xl gap-8">备注</div>
               <div className="w-[200px]"></div>
             </div>
           </div>
@@ -545,15 +553,16 @@ const Home = () => {
                     ></div>
                     {getCategoryById(task.category).name}
                   </div>
-                  <div className="flex-2 gap-8 whitespace-pre-wrap">
-                    {task.summary}
-                  </div>
                   <div className="flex-1">
                     {task.startDate ? `🗓️ ${formatDate(task.startDate)}` : ""}
                   </div>
                   <div className="flex-1">
                     {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
                   </div>
+                  <div className="flex-2 gap-8 whitespace-pre-wrap">
+                    {task.summary}
+                  </div>
+
                   <div className="flex gap-2 w-[200px]">
                     <Button
                       variant="outline"
