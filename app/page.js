@@ -19,14 +19,30 @@ import {
 
 const Home = () => {
   // Categories state with predefined categories
+
   const [categories, setCategories] = useState([
-    { id: "language", name: "语言考试", color: "#bce7fd" }, // 保持原有的浅蓝色
-    { id: "gpa", name: "GPA", color: "#b0db43" }, // 保持原有的青柠绿
-    { id: "course", name: "选课", color: "#a8e6cf" }, // 清新的薄荷绿
-    { id: "resume", name: "简历", color: "#ffd3b6" }, // 保持原有的浅紫色
-    { id: "recommendation", name: "推荐信", color: "#ffb5e8" }, // 柔和的粉色
-    { id: "interview", name: "模拟面试", color: "#dcd3ff" }, // 淡雅的薰衣草紫
-    { id: "practice", name: "实习/科研/海外交换", color: "#db2763" }, // 保持原有的玫红色
+    { id: "all", name: "全部", color: "#e0e0e0" },
+    { id: "performance", name: "成绩", color: "#b0db43" },
+    { id: "englishPerformance", name: "英语成绩", color: "#bce7fd" },
+    {
+      id: "practiceResearchOverseas",
+      name: "实习/科研/海外",
+      color: "#db2763",
+    },
+    { id: "schoolAndProject", name: "选校&项目", color: "#f7d794" },
+    { id: "materialsAndOutline", name: "素材&提纲", color: "#a8e6cf" },
+    { id: "psAndSop", name: "PS&SOP", color: "#c7ecee" },
+    { id: "resume", name: "简历", color: "#ffd3b6" },
+    { id: "recommendationLetter", name: "推荐信", color: "#ffb5e8" },
+    { id: "tongci", name: "套词", color: "#dcd3ff" },
+    { id: "onlineApplication", name: "网申", color: "#f6a5c0" },
+    { id: "mockInterview", name: "模拟面试", color: "#b5d3e7" },
+    { id: "universitySelection", name: "大学选课", color: "#a8e6cf" },
+    { id: "others", name: "其他", color: "#e0e0e0" },
+    { id: "standardSeedClassCourse", name: "棕榈种子班课", color: "#f9d5e5" },
+    { id: "semesterCommunication", name: "学期沟通", color: "#eeac99" },
+    { id: "exclusiveOnly", name: "专享only", color: "#d4f0f0" },
+    { id: "nodeEmail", name: "节点邮件", color: "#ffc4a3" },
   ]);
 
   // 添加移动term的处理函数
