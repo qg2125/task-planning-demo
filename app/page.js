@@ -492,6 +492,35 @@ const Home = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
+              <div className="flex items-center gap-3">
+                <label className="block text-sm font-medium text-gray-700">
+                  收件人
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" className="w-5 h-5 accent-blue-500" />
+                <label className="block text-sm font-medium text-gray-700">
+                  专业导师 - 张世昌 - xx@gmail.com
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <input type="checkbox" className="w-5 h-5 accent-blue-500" />
+                <label className="block text-sm font-medium text-gray-700">
+                  学生 - Terry - xx@gmail.com
+                </label>
+              </div>
+              <Button type="button" variant="outline">
+                添加邮箱
+              </Button>
+
+              <div className="text-center p-10 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all">
+                <div className="text-5xl text-gray-400 mb-4">↑</div>
+                <div className="text-gray-600 mb-4">
+                  将文件拖到此处，或点击上传
+                </div>
+
+                <input type="file" className="hidden" multiple />
+              </div>
 
               <div className="flex justify-center space-x-4 mt-6">
                 <Button
