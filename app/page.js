@@ -8,7 +8,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { CalendarIcon, FileText, Mail, X } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  CalendarIcon,
+  FileText,
+  Mail,
+  X,
+} from "lucide-react";
 
 const Home = () => {
   // Categories state with predefined categories
@@ -21,6 +28,25 @@ const Home = () => {
     { id: "interview", name: "模拟面试", color: "#dcd3ff" }, // 淡雅的薰衣草紫
     { id: "practice", name: "实习/科研/海外交换", color: "#db2763" }, // 保持原有的玫红色
   ]);
+
+  // 添加移动term的处理函数
+  const moveTerm = (termId, direction) => {
+    setTerms((prevTerms) => {
+      const terms = [...prevTerms];
+      const index = terms.findIndex((term) => term.id === termId);
+      if (
+        (direction === "up" && index === 0) ||
+        (direction === "down" && index === terms.length - 1)
+      ) {
+        return prevTerms;
+      }
+      const newIndex = direction === "up" ? index - 1 : index + 1;
+      const [movedTerm] = terms.splice(index, 1);
+      terms.splice(newIndex, 0, movedTerm);
+
+      return terms;
+    });
+  };
 
   //发送邮件
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -106,6 +132,7 @@ const Home = () => {
           tasks: [],
           showTaskModal: false,
           newTask: {
+            task_name: "",
             category: "",
             summary: "",
             startDate: null,
@@ -264,7 +291,12 @@ const Home = () => {
                   : task
               ),
               showTaskModal: false,
-              newTask: { category: "", summary: "", dueDate: null },
+              newTask: {
+                task_name: "",
+                category: "",
+                summary: "",
+                dueDate: null,
+              },
             };
           } else {
             // Add new task
@@ -272,7 +304,12 @@ const Home = () => {
               ...term,
               tasks: [...term.tasks, { ...term.newTask, id: Date.now() }],
               showTaskModal: false,
-              newTask: { category: "", summary: "", dueDate: null },
+              newTask: {
+                task_name: "",
+                category: "",
+                summary: "",
+                dueDate: null,
+              },
             };
           }
         }
@@ -328,7 +365,7 @@ const Home = () => {
               : item
           ),
           showAddForm: false,
-          newItem: { category: "", summary: "", dueDate: null },
+          newItem: { task_name: "", category: "", summary: "", dueDate: null },
         });
       } else {
         // Add new task
@@ -339,7 +376,7 @@ const Home = () => {
             { ...overallPlan.newItem, id: Date.now() },
           ],
           showAddForm: false,
-          newItem: { category: "", summary: "", dueDate: null },
+          newItem: { task_name: "", category: "", summary: "", dueDate: null },
         });
       }
       setEditingTaskId(null);
@@ -549,9 +586,18 @@ const Home = () => {
         {/* Task Headers */}
         <div className="mb-6">
           <div className="flex">
+            <div className="flex-1 text-2xl">任务名称</div>
             <div className="flex-1 text-2xl">类别</div>
-            <div className="flex-1 text-2xl">开始日期</div>
-            <div className="flex-1 text-2xl">截止日期</div>
+            <div className="flex-1 text-2xl">开始时间</div>
+            <div className="flex-1 text-2xl">
+              <div className="flex items-center space-x-2 ">
+                <span>结束时间</span>
+                <div className="flex flex-col">
+                  <ChevronUp className="h-3 w-3 text-gray-500" />
+                  <ChevronDown className="h-3 w-3 text-gray-500" />
+                </div>
+              </div>
+            </div>
             <div className="flex-2 text-2xl gap-8">备注</div>
             <div className="w-[200px]"></div>
           </div>
@@ -562,6 +608,9 @@ const Home = () => {
           <div className="mb-8">
             {overallPlan.items.map((task) => (
               <div key={task.id} className="flex py-2 items-center">
+                <div className="flex-1 gap-8 whitespace-pre-wrap">
+                  {task.task_name}
+                </div>
                 <div className="flex-1 flex items-center">
                   <div
                     className="w-4 h-4 rounded-full mr-2"
@@ -617,7 +666,7 @@ const Home = () => {
       </div>
 
       {/* Terms and their Task Lists */}
-      {terms.map((term) => (
+      {terms.map((term, index) => (
         <div key={term.id} className="mb-16 border-t pt-8">
           {/* Term Banner */}
           <div className="mb-10 flex items-center justify-between">
@@ -644,6 +693,22 @@ const Home = () => {
                     <Button
                       variant="outline"
                       className="border-primary text-primary"
+                      disabled={index === 0}
+                      onClick={() => moveTerm(term.id, "up")}
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
+                      disabled={index === terms.length - 1}
+                      onClick={() => moveTerm(term.id, "down")}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-primary text-primary"
                       onClick={() => handleEditTerm(term)}
                     >
                       编辑
@@ -666,9 +731,18 @@ const Home = () => {
           {/* Task Headers */}
           <div className="mb-6">
             <div className="flex">
+              <div className="flex-1 text-2xl">任务名称</div>
               <div className="flex-1 text-2xl">类别</div>
-              <div className="flex-1 text-2xl">开始日期</div>
-              <div className="flex-1 text-2xl">截止日期</div>
+              <div className="flex-1 text-2xl">开始时间</div>
+              <div className="flex-1 text-2xl">
+                <div className="flex items-center space-x-2 ">
+                  <span>结束时间</span>
+                  <div className="flex flex-col">
+                    <ChevronUp className="h-3 w-3 text-gray-500" />
+                    <ChevronDown className="h-3 w-3 text-gray-500" />
+                  </div>
+                </div>
+              </div>
               <div className="flex-2 text-2xl gap-8">备注</div>
               <div className="w-[200px]"></div>
             </div>
@@ -679,6 +753,9 @@ const Home = () => {
             <div className="mb-8">
               {term.tasks.map((task) => (
                 <div key={task.id} className="flex py-2 items-center">
+                  <div className="flex-1 gap-8 whitespace-pre-wrap">
+                    {task.task_name}
+                  </div>
                   <div className="flex-1 flex items-center">
                     <div
                       className="w-4 h-4 rounded-full mr-2"
@@ -743,6 +820,19 @@ const Home = () => {
 
                 <form onSubmit={(e) => handleTaskSubmit(term.id, e)}>
                   <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        任务名称
+                      </label>
+                      <textarea
+                        type="text"
+                        name="task_name"
+                        value={term.newTask?.task_name || ""}
+                        onChange={(e) => handleTaskInputChange(term.id, e)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        autoFocus
+                      />
+                    </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         类别
@@ -910,6 +1000,19 @@ const Home = () => {
 
             <form onSubmit={handleOverallTaskSubmit}>
               <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    任务名称
+                  </label>
+                  <textarea
+                    type="text"
+                    name="task_name"
+                    value={overallPlan.newItem?.task_name || ""}
+                    onChange={handleOverallTaskInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    autoFocus
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     类别
