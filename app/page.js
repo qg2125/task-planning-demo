@@ -23,7 +23,7 @@ const Home = () => {
   const [categories, setCategories] = useState([
     { id: "all", name: "全部", color: "#e0e0e0" },
     { id: "performance", name: "成绩", color: "#b0db43" },
-    { id: "englishPerformance", name: "英语成绩", color: "#bce7fd" },
+    { id: "englishPerformance", name: "标化成绩", color: "#bce7fd" },
     {
       id: "practiceResearchOverseas",
       name: "实习/科研/海外",
