@@ -45,6 +45,15 @@ const Home = () => {
     { id: "nodeEmail", name: "节点邮件", color: "#ffc4a3" },
   ]);
 
+  const [collapsedTerms, setCollapsedTerms] = useState({});
+  // 简化的切换函数
+  const toggleTermCollapse = (termId) => {
+    setCollapsedTerms((prev) => ({
+      ...prev,
+      [termId]: !prev[termId],
+    }));
+  };
+
   // 添加移动term的处理函数
   const moveTerm = (termId, direction) => {
     setTerms((prevTerms) => {
@@ -705,6 +714,13 @@ const Home = () => {
                   <h1 className="text-3xl font-bold text-primary">
                     {term.name}
                   </h1>
+                  <Button
+                    onClick={() => toggleTermCollapse(term.id)}
+                    variant="outline"
+                    className="ml-2"
+                  >
+                    {collapsedTerms[term.id] ? "展开" : "折叠"}
+                  </Button>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
@@ -745,87 +761,93 @@ const Home = () => {
           </div>
 
           {/* Task Headers */}
-          <div className="mb-6">
-            <div className="flex">
-              <div className="flex-1 text-2xl">任务名称</div>
-              <div className="flex-1 text-2xl">类别</div>
-              <div className="flex-1 text-2xl">开始时间</div>
-              <div className="flex-1 text-2xl">
-                <div className="flex items-center space-x-2 ">
-                  <span>结束时间</span>
-                  <div className="flex flex-col">
-                    <ChevronUp className="h-3 w-3 text-gray-500" />
-                    <ChevronDown className="h-3 w-3 text-gray-500" />
+          {!collapsedTerms[term.id] && (
+            <div className="pl-4">
+              <div className="mb-6">
+                <div className="flex">
+                  <div className="flex-1 text-2xl">任务名称</div>
+                  <div className="flex-1 text-2xl">类别</div>
+                  <div className="flex-1 text-2xl">开始时间</div>
+                  <div className="flex-1 text-2xl">
+                    <div className="flex items-center space-x-2 ">
+                      <span>结束时间</span>
+                      <div className="flex flex-col">
+                        <ChevronUp className="h-3 w-3 text-gray-500" />
+                        <ChevronDown className="h-3 w-3 text-gray-500" />
+                      </div>
+                    </div>
                   </div>
+                  <div className="flex-2 text-2xl gap-8">备注</div>
+                  <div className="w-[200px]"></div>
                 </div>
               </div>
-              <div className="flex-2 text-2xl gap-8">备注</div>
-              <div className="w-[200px]"></div>
-            </div>
-          </div>
 
-          {/* Task List */}
-          {term.tasks.length > 0 && (
-            <div className="mb-8">
-              {term.tasks.map((task) => (
-                <div key={task.id} className="flex py-2 items-center">
-                  <div className="flex-1 gap-8 whitespace-pre-wrap">
-                    {task.task_name}
-                  </div>
-                  <div className="flex-1 flex items-center">
-                    <div
-                      className="w-4 h-4 rounded-full mr-2"
-                      style={{
-                        backgroundColor: getCategoryById(task.category).color,
-                      }}
-                    ></div>
-                    {getCategoryById(task.category).name}
-                  </div>
-                  <div className="flex-1">
-                    {task.startDate ? `🗓️ ${formatDate(task.startDate)}` : ""}
-                  </div>
-                  <div className="flex-1">
-                    {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
-                  </div>
-                  <div className="flex-2 gap-8 whitespace-pre-wrap">
-                    {task.summary}
-                  </div>
+              {/* Task List */}
+              {term.tasks.length > 0 && (
+                <div className="mb-8">
+                  {term.tasks.map((task) => (
+                    <div key={task.id} className="flex py-2 items-center">
+                      <div className="flex-1 gap-8 whitespace-pre-wrap">
+                        {task.task_name}
+                      </div>
+                      <div className="flex-1 flex items-center">
+                        <div
+                          className="w-4 h-4 rounded-full mr-2"
+                          style={{
+                            backgroundColor: getCategoryById(task.category)
+                              .color,
+                          }}
+                        ></div>
+                        {getCategoryById(task.category).name}
+                      </div>
+                      <div className="flex-1">
+                        {task.startDate
+                          ? `🗓️ ${formatDate(task.startDate)}`
+                          : ""}
+                      </div>
+                      <div className="flex-1">
+                        {task.dueDate ? `🗓️ ${formatDate(task.dueDate)}` : ""}
+                      </div>
+                      <div className="flex-2 gap-8 whitespace-pre-wrap">
+                        {task.summary}
+                      </div>
 
-                  <div className="flex gap-2 w-[200px]">
-                    <Button
-                      variant="outline"
-                      className="border-primary text-primary"
-                      onClick={() => handleEditTask(term.id, task)}
-                    >
-                      编辑
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-primary text-primary"
-                      onClick={() =>
-                        setShowDeleteConfirm({
-                          type: "task",
-                          id: task.id,
-                          termId: term.id,
-                        })
-                      }
-                    >
-                      删除
-                    </Button>
-                  </div>
+                      <div className="flex gap-2 w-[200px]">
+                        <Button
+                          variant="outline"
+                          className="border-primary text-primary"
+                          onClick={() => handleEditTask(term.id, task)}
+                        >
+                          编辑
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-primary text-primary"
+                          onClick={() =>
+                            setShowDeleteConfirm({
+                              type: "task",
+                              id: task.id,
+                              termId: term.id,
+                            })
+                          }
+                        >
+                          删除
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
+
+              {/* Add Task Button */}
+              <button
+                onClick={() => toggleTaskModal(term.id, true)}
+                className="px-4 py-2 text-xl text-secondary hover:bg-gray-100"
+              >
+                + 添加任务
+              </button>
             </div>
           )}
-
-          {/* Add Task Button */}
-          <button
-            onClick={() => toggleTaskModal(term.id, true)}
-            className="px-4 py-2 text-xl text-secondary hover:bg-gray-100"
-          >
-            + 添加任务
-          </button>
-
           {/* Task Modal */}
           {term.showTaskModal && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
